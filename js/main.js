@@ -3,6 +3,7 @@ enchant();
 function Game_load(width,height){
 
   var game = new Game(width,height);
+  var Scene_kazu = 1;
 
   game.fps = 100;
   game.onload = function(){
@@ -69,13 +70,21 @@ function Game_load(width,height){
       Button[i]._element.onclick = function(e){
         if(a.split(",")[6]) Sound_branch(a.split(",")[6]);
         else Sound_branch("無し");
-        if(a.split(",")[5]=="アイテム"){
-          game.pushScene(MainScene("アイテム"));
-          return;
-        }
-        if(a.split(",")[5]=="popScene"){
-          game.popScene();
-          return;
+        switch (a.split(",")[5]) {
+          case "人物":
+          case "アイテム":
+            if(Scene_kazu == 1){
+              game.pushScene(MainScene(a.split(",")[5]));
+              Scene_kazu++;
+            }
+            else game.replaceScene(MainScene(a.split(",")[5]));
+            return;
+            break;
+          case "popScene":
+            game.popScene();
+            Scene_kazu--;
+            return;
+            break;
         }
         for (var i = 0; i < Game_Datas.length; i++) {
           if(Game_Datas[i].Number==a.split(",")[5]) break;
@@ -99,15 +108,26 @@ function Game_load(width,height){
 
     var White_Background = new Sprite();
     White_Background._element = document.createElement("img");
-    if(Data=="アイテム"){
-      White_Background._element.src = "画像/メニュー背景.png";
-      White_Background.height = height;
-      Data = "(ボタン:戻る,20,20,80,80,popScene,戻る)(ボタン:設定を開く,162.5,20,80,80,popScene,メニュー)(ボタン:人物,305,20,80,80,popScene,メニュー)";
-    }
-    else{
-      White_Background._element.src = "画像/白.png";
-      White_Background.y = width/16*9;
-      White_Background.height = height-width/16*9;
+    switch(Data){
+      case "アイテム":
+        White_Background._element.src = "画像/メニュー背景.png";
+        White_Background.height = height;
+        Data  = "(ボタン:戻る,30,30,80,40,popScene,戻る)";
+        Data += "(ボタン:設定,162.5,30,80,40,popScene,メニュー)";
+        Data += "(ボタン:人物,295,30,80,40,人物,メニュー)";
+        break;
+      case "人物":
+        White_Background._element.src = "画像/メニュー背景.png";
+        White_Background.height = height;
+        Data  = "(ボタン:戻る,30,30,80,40,popScene,戻る)";
+        Data += "(ボタン:設定,162.5,30,80,40,popScene,メニュー)";
+        Data += "(ボタン:アイテム,295,30,80,40,アイテム,メニュー)";
+        break;
+      default:
+        White_Background._element.src = "画像/白.png";
+        White_Background.y = width/16*9;
+        White_Background.height = height-width/16*9;
+        break;
     }
     White_Background.width = width;
     scene.addChild(White_Background);
