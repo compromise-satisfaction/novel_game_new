@@ -7,9 +7,10 @@ function Game_load(width,height){
   game.fps = 100;
   game.onload = function(){
 
-  function Sound_branch(Sound_url){
+  function Sound_branch(a){
+      if(a=="無し") return;
       for (var i = 0; i < SE.length; i++) {
-        if(SE[i].title == Sound_url) break;
+        if(SE[i].title == a) break;
       }
       if(SE[i].paused) SE[i].play();
       else SE[i].currentTime = 0;
@@ -66,6 +67,8 @@ function Game_load(width,height){
         Button[i].backgroundColor = "red";
       }
       Button[i]._element.onclick = function(e){
+        if(a.split(",")[6]) Sound_branch(a.split(",")[6]);
+        else Sound_branch("無し");
         for (var i = 0; i < Game_Datas.length; i++) {
           if(Game_Datas[i].Number==a.split(",")[5]) break;
         }
@@ -124,6 +127,16 @@ function Game_load(width,height){
       Data = Data.replace(/\(待機時間:.+?\)/g,"δ");//テキストを消費
     }
 
+    var Sounds_Data = Data.match(/\(再生:.+?\)/g);
+
+    if(Sounds_Data){
+      var Sound_Number = 0;
+      for (var i = 0; i < Sounds_Data.length; i++) {
+        Sounds_Data[i] = Sounds_Data[i].substring(4,Sounds_Data[i].length-1);
+      }
+      Data = Data.replace(/\(再生:.+?\)/g,"Ψ");//テキストを消費
+    }
+
     var Coordinates_Data = Data.match(/\(文字座標:.+?\)/g);
 
     if(Coordinates_Data){
@@ -152,10 +165,11 @@ function Game_load(width,height){
     var PX = width/20;
     var Text_X = width/20;
     var Text_Y = width/20 + width/20 + width/16*9;
+    var Text_Sound = "無し";
     var Text_Color = "black";
     var Text_Number = 0;
     var Itimozi = null;
-    var FPS = 4;
+    var FPS = 5;
     var Display_time = 0;
 
     function Texts(){
@@ -188,6 +202,7 @@ function Game_load(width,height){
         case "¶":
           PX = Text_informations_Data[Text_information_Number].split(",")[0]*1;
           Text_Color = Text_informations_Data[Text_information_Number].split(",")[1];
+          Text_Sound = Text_informations_Data[Text_information_Number].split(",")[2];
           Text_information_Number++
           Text_Number++;
           Texts();
@@ -200,6 +215,12 @@ function Game_load(width,height){
           Texts();
           return;
           break;
+        case "Ψ":
+          Sound_branch(Sounds_Data[Sound_Number]);
+          Sound_Number++
+          Text_Number++;
+          Texts();
+          return;
         case "±":
           Text_X = Coordinates_Data[Coordinate_Number].split(",")[0]*1;
           Text_Y = Coordinates_Data[Coordinate_Number].split(",")[1]*1;
@@ -228,7 +249,7 @@ function Game_load(width,height){
       Text[Text_Number].y = Text_Y;
       Text[Text_Number]._style.color = Text_Color;
       Text_X += PX;
-      Sound_branch("ポポポ");
+      Sound_branch(Text_Sound);
       scene.addChild(Text[Text_Number]);
       Text_Number++;
       return;
@@ -252,9 +273,15 @@ function Game_load(width,height){
   ).then(res => res.json()).then(result => {
      Game_Datas = result;
      SE = [];
-     SE[0] = document.createElement("audio");
-     SE[0].src = "https://raw.githubusercontent.com/compromise-satisfaction/Saved/master/音/効果音/ポポポ(男).wav";
-     SE[0].title = "ポポポ";
+     var SE_Number = 0;
+     for (var i = 0; i < result.length; i++) {
+       if(result[i].Data.match(/\(音:.+?\)/)){
+         SE[SE_Number] = document.createElement("audio");
+         SE[SE_Number].src = result[i].Data.substring(3,result[i].Data.length-1);
+         SE[SE_Number].title = result[i].Number;
+         SE_Number++;
+       }
+     }
      game.replaceScene(MainScene("(ボタン:スタート,0,0,405,600,スタート)"));
      return;
     },);
