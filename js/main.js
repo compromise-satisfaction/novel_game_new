@@ -69,11 +69,20 @@ function Game_load(width,height){
       Button[i]._element.onclick = function(e){
         if(a.split(",")[6]) Sound_branch(a.split(",")[6]);
         else Sound_branch("無し");
+        if(a.split(",")[5]=="アイテム"){
+          game.pushScene(MainScene("アイテム"));
+          return;
+        }
+        if(a.split(",")[5]=="popScene"){
+          game.popScene();
+          return;
+        }
         for (var i = 0; i < Game_Datas.length; i++) {
           if(Game_Datas[i].Number==a.split(",")[5]) break;
         }
         if(i < Game_Datas.length) game.replaceScene(MainScene(Game_Datas[i].Data));
         else game.replaceScene(MainScene("(ボタン:エラー,0,0,405,600,スタート)"));
+        return;
       };
     }
 
@@ -90,10 +99,17 @@ function Game_load(width,height){
 
     var White_Background = new Sprite();
     White_Background._element = document.createElement("img");
-    White_Background._element.src = "画像/白.png";
-    White_Background.y = width/16*9;
+    if(Data=="アイテム"){
+      White_Background._element.src = "画像/メニュー背景.png";
+      White_Background.height = height;
+      Data = "(ボタン:戻る,20,20,80,80,popScene,戻る)(ボタン:設定を開く,162.5,20,80,80,popScene,メニュー)(ボタン:人物,305,20,80,80,popScene,メニュー)";
+    }
+    else{
+      White_Background._element.src = "画像/白.png";
+      White_Background.y = width/16*9;
+      White_Background.height = height-width/16*9;
+    }
     White_Background.width = width;
-    White_Background.height = height-width/16*9;
     scene.addChild(White_Background);
 
     var Buttons_Data = Data.match(/\(ボタン:.+?\)/g);
