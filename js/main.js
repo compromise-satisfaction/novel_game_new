@@ -221,6 +221,7 @@ function Game_load(width,height){
           Text_Number++;
           Texts();
           return;
+          break;
         case "±":
           Text_X = Coordinates_Data[Coordinate_Number].split(",")[0]*1;
           Text_Y = Coordinates_Data[Coordinate_Number].split(",")[1]*1;
