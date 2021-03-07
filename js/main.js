@@ -4,6 +4,22 @@ function Game_load(width,height){
 
   var game = new Game(width,height);
   var Scene_kazu = 1;
+  var Setting_Flag = {
+    人物ページ:0,
+    アイテムページ:0,
+    BGM音量:5,
+    音声音量:5,
+    効果音音量:5,
+    自由:"自由",
+    名前:"名前",
+    苗字:"苗字",
+    性別:"未設定",
+    一人称:"一人称",
+    二人称:"二人称",
+    オートセーブ:true,
+    演出スキップ:false,
+    シーンナンバー:"スタート"
+  };
 
   game.fps = 100;
   game.onload = function(){
@@ -13,12 +29,30 @@ function Game_load(width,height){
       for (var i = 0; i < SE.length; i++) {
         if(SE[i].title == a) break;
       }
-      if(SE[i].paused) SE[i].play();
-      else SE[i].currentTime = 0;
+      switch(SE[i].type){
+        case "音声":
+          var Volume = Setting_Flag.音声音量;
+          break;
+        case "効果音":
+          var Volume = Setting_Flag.効果音音量;
+          break;
+        default:
+          var Volume = Setting_Flag.BGM音量;
+          break;
+      }
+      if(Volume){
+        Volume /= 10;
+        SE[i].volume = Volume;
+        if(SE[i].paused) SE[i].play();
+        else SE[i].currentTime = 0;
+      }
+      else{
+        if(SE[i].paused==false) SE[i].pause();
+      }
       return;
     }
 
-  var MainScene = function(Data){
+  var Novel_MainScene = function(Data){
 
     var scene = new Scene();                                // 新しいシーンを作る
 
@@ -43,8 +77,8 @@ function Game_load(width,height){
             for (var i = 0; i < Game_Datas.length; i++) {
               if(Game_Datas[i].Number==a.split(",")[5]) break;
             }
-            if(i < Game_Datas.length) game.replaceScene(MainScene(Game_Datas[i].Data));
-            else game.replaceScene(MainScene("(ボタン:エラー,0,0,405,600,スタート)"));
+            if(i < Game_Datas.length) game.replaceScene(Novel_MainScene(Game_Datas[i].Data));
+            else game.replaceScene(Novel_MainScene("(ボタン:エラー,0,0,405,600,スタート)"));
           });
         }
       }
@@ -70,14 +104,14 @@ function Game_load(width,height){
       Button[i]._element.onclick = function(e){
         if(a.split(",")[6]) Sound_branch(a.split(",")[6]);
         else Sound_branch("無し");
-        switch (a.split(",")[5]) {
+        switch(a.split(",")[7]){
           case "人物":
           case "アイテム":
             if(Scene_kazu == 1){
-              game.pushScene(MainScene(a.split(",")[5]));
+              game.pushScene(Novel_MainScene(a.split(",")[7]));
               Scene_kazu++;
             }
-            else game.replaceScene(MainScene(a.split(",")[5]));
+            else game.replaceScene(Novel_MainScene(a.split(",")[7]));
             return;
             break;
           case "popScene":
@@ -85,12 +119,15 @@ function Game_load(width,height){
             Scene_kazu--;
             return;
             break;
+          default:
+            Setting_Flag.シーンナンバー = a.split(",")[5];
+            break;
         }
         for (var i = 0; i < Game_Datas.length; i++) {
           if(Game_Datas[i].Number==a.split(",")[5]) break;
         }
-        if(i < Game_Datas.length) game.replaceScene(MainScene(Game_Datas[i].Data));
-        else game.replaceScene(MainScene("(ボタン:エラー,0,0,405,600,スタート)"));
+        if(i < Game_Datas.length) game.replaceScene(Novel_MainScene(Game_Datas[i].Data));
+        else game.replaceScene(Novel_MainScene("(ボタン:エラー,0,0,405,600,スタート)"));
         return;
       };
     }
@@ -112,14 +149,14 @@ function Game_load(width,height){
       case "アイテム":
         White_Background._element.src = "画像/メニュー背景.png";
         White_Background.height = height;
-        Data  = "(ボタン:戻る,30,30,80,40,popScene,戻る)";
+        Data  = "(ボタン:戻る,30,30,80,40,popScene,戻る,popScene)";
         Data += "(ボタン:設定,162.5,30,80,40,popScene,メニュー)";
         Data += "(ボタン:人物,295,30,80,40,人物,メニュー)";
         break;
       case "人物":
         White_Background._element.src = "画像/メニュー背景.png";
         White_Background.height = height;
-        Data  = "(ボタン:戻る,30,30,80,40,popScene,戻る)";
+        Data  = "(ボタン:戻る,30,30,80,40,popScene,戻る,popScene)";
         Data += "(ボタン:設定,162.5,30,80,40,popScene,メニュー)";
         Data += "(ボタン:アイテム,295,30,80,40,アイテム,メニュー)";
         break;
@@ -313,13 +350,15 @@ function Game_load(width,height){
      var SE_Number = 0;
      for (var i = 0; i < result.length; i++) {
        if(result[i].Data.match(/\(音:.+?\)/)){
+         result[i].Data = result[i].Data.substring(3,result[i].Data.length-1);
          SE[SE_Number] = document.createElement("audio");
-         SE[SE_Number].src = result[i].Data.substring(3,result[i].Data.length-1);
+         SE[SE_Number].src = result[i].Data.split(",")[0];
+         SE[SE_Number].type = result[i].Data.split(",")[1];
          SE[SE_Number].title = result[i].Number;
          SE_Number++;
        }
      }
-     game.replaceScene(MainScene("(ボタン:スタート,0,0,405,600,スタート)"));
+     game.replaceScene(Novel_MainScene("(ボタン:スタート,0,0,405,600,スタート)"));
      return;
     },);
 }
