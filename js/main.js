@@ -151,14 +151,14 @@ function Game_load(width,height){
         White_Background.height = height;
         Data  = "(ボタン:戻る,30,30,80,40,popScene,戻る,popScene)";
         Data += "(ボタン:設定,162.5,30,80,40,popScene,メニュー)";
-        Data += "(ボタン:人物,295,30,80,40,人物,メニュー)";
+        Data += "(ボタン:人物,295,30,80,40,人物,メニュー,人物)";
         break;
       case "人物":
         White_Background._element.src = "画像/メニュー背景.png";
         White_Background.height = height;
         Data  = "(ボタン:戻る,30,30,80,40,popScene,戻る,popScene)";
         Data += "(ボタン:設定,162.5,30,80,40,popScene,メニュー)";
-        Data += "(ボタン:アイテム,295,30,80,40,アイテム,メニュー)";
+        Data += "(ボタン:アイテム,295,30,80,40,アイテム,メニュー,アイテム)";
         break;
       default:
         White_Background._element.src = "画像/白.png";
