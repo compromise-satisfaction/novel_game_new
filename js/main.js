@@ -1,9 +1,16 @@
 enchant();
 
+var BGM = document.createElement("audio");
+BGM.addEventListener("ended",function(e){
+  BGM.currentTime = BGM.id*1;
+  BGM.play();
+});
+
 function Game_load(width,height){
 
   var game = new Game(width,height);
   var Scene_kazu = 1;
+  var Item_Flag = [];
   var Setting_Flag = {
     人物ページ:0,
     アイテムページ:0,
@@ -48,6 +55,34 @@ function Game_load(width,height){
       }
       else{
         if(SE[i].paused==false) SE[i].pause();
+      }
+      return;
+    }
+  function BGM_ON(BGM_Name){
+      switch(BGM_Name){
+        case "無し":
+          if(BGM.paused==false) BGM.pause();
+          BGM.title = BGM_Name;
+          break;
+        case "消音":
+          BGM.volume = 0;
+          break;
+        case "オン":
+          BGM.volume = Setting_Flag.BGM音量/10;
+          break;
+        default:
+          if(BGM.title == BGM_Name && BGM.paused == false) return;
+          if(BGM.paused==false) BGM.pause();
+          for (var i = 0; i < SE.length; i++) {
+            if(SE[i].title == BGM_Name) break;
+          }
+          BGM.src = SE[i].src;
+          BGM.currentTime = 0;
+          BGM.volume = Setting_Flag.BGM音量/10;
+          BGM.play();
+          BGM.title = BGM_Name;
+          BGM.id = SE[i].type;
+          break;
       }
       return;
     }
@@ -152,6 +187,9 @@ function Game_load(width,height){
         Data  = "(ボタン:戻る,30,30,80,40,popScene,戻る,popScene)";
         Data += "(ボタン:設定,162.5,30,80,40,popScene,メニュー)";
         Data += "(ボタン:人物,295,30,80,40,人物,メニュー,人物)";
+        for (var i = 0; i < Item_Flag.length; i++) {
+          Data += "(ボタン:" + Item_Flag[i] + ",30,140,345,40,人物,メニュー,人物)";
+        }
         break;
       case "人物":
         White_Background._element.src = "画像/メニュー背景.png";
@@ -208,6 +246,26 @@ function Game_load(width,height){
         Sounds_Data[i] = Sounds_Data[i].substring(4,Sounds_Data[i].length-1);
       }
       Data = Data.replace(/\(再生:.+?\)/g,"Ψ");//テキストを消費
+    }
+
+    var BGMs_Data = Data.match(/\(BGM:.+?\)/g);
+
+    if(BGMs_Data){
+      var BGM_Number = 0;
+      for (var i = 0; i < BGMs_Data.length; i++) {
+        BGMs_Data[i] = BGMs_Data[i].substring(5,BGMs_Data[i].length-1);
+      }
+      Data = Data.replace(/\(BGM:.+?\)/g,"§");//テキストを消費
+    }
+
+    var Items_Data = Data.match(/\(アイテム:.+?\)/g);
+
+    if(Items_Data){
+      var Item_Number = 0;
+      for (var i = 0; i < Items_Data.length; i++) {
+        Items_Data[i] = Items_Data[i].substring(6,Items_Data[i].length-1);
+      }
+      Data = Data.replace(/\(アイテム:.+?\)/g,"π");//テキストを消費
     }
 
     var Coordinates_Data = Data.match(/\(文字座標:.+?\)/g);
@@ -291,6 +349,25 @@ function Game_load(width,height){
         case "Ψ":
           Sound_branch(Sounds_Data[Sound_Number]);
           Sound_Number++
+          Text_Number++;
+          Texts();
+          return;
+          break;
+        case "§":
+          BGM_ON(BGMs_Data[BGM_Number]);
+          BGM_Number++
+          Text_Number++;
+          Texts();
+          return;
+          break;
+        case "π":
+          for (var i = 0; i < Item_Flag.length; i++) {
+            if(Item_Flag[i] == Items_Data[Item_Number]){
+              break;
+            }
+          }
+          if(i==Item_Flag.length) Item_Flag[Item_Flag.length] = Items_Data[Item_Number];
+          Item_Number++
           Text_Number++;
           Texts();
           return;
